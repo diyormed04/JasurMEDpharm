@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="uz" dir="ltr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0A1930">
+<meta name="description" content="Jasur Med - Dorixona">
+<title>Jasur Med - Dorixona</title>
+<link rel="manifest" href="manifest.json">
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+tailwind.config = {
+    darkMode: 'class',
+    theme: {
+        extend: {
+            fontFamily: {
+                sans: ['Inter', 'sans-serif'],
+                display: ['Plus Jakarta Sans', 'sans-serif']
+            },
+            colors: {
+                primary: '#1B4B8F',
+                secondary: '#0A1930',
+                accent: '#0C7B72',
+                light: '#F4F7FB',
+                danger: '#DC2626',
+                warning: '#B45309',
+                success: '#15803D'
+            }
+        }
+    }
+}
+</script>
+<link rel="stylesheet" href="style.css">
+</head>
+<body class="bg-gray-50 text-gray-800 transition-colors duration-300">
+
+<!-- ==================== LANDING PAGE (Guest) ==================== -->
+<div id="landingPage">
+    <!-- Top Navbar -->
+    <nav class="nav-glass fixed top-0 left-0 right-0 z-50 px-4 py-3">
+        <div class="max-w-7xl mx-auto flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 brand-mark rounded-xl flex items-center justify-center">
+                    <i class="fas fa-shield-medical text-white text-lg"></i>
+                </div>
+                <div>
+                    <h1 class="text-white font-bold text-lg leading-tight">JasurMED</h1>
+                    <p class="text-primary text-xs font-medium tracking-wider">PHARM</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-3">
+                <button onclick="switchLang('lotin')" id="landLotin" class="lang-btn px-3 py-1.5 rounded-lg text-xs font-medium text-white border border-white/20 active">Lotin</button>
+                <button onclick="switchLang('kril')" id="landKril" class="lang-btn px-3 py-1.5 rounded-lg text-xs font-medium text-white border border-white/20">Крил</button>
+                <button onclick="toggleDarkMode()" class="w-10 h-10 rounded-lg flex items-center justify-center text-white/80 hover:text-white hover:bg-white/10 transition-colors" aria-label="Tungi rejimga o'tish">
+                    <i class="fas fa-sun" id="darkModeIcon"></i>
+                </button>
+                <button onclick="openGuestCart()" class="relative w-10 h-10 rounded-lg flex items-center justify-center text-white/80 hover:text-white hover:bg-white/10 transition-colors" aria-label="Savatni ochish">
+                    <i class="fas fa-shopping-cart"></i>
+                    <span id="guestCartBadge" class="absolute -top-1 -right-1 bg-primary text-white text-[10px] font-bold rounded-full w-5 h-5 flex items-center justify-center hidden">0</span>
+                </button>
+                <button onclick="showAuthScreen()" class="hidden md:block bg-primary hover:bg-primary/90 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors" data-key="staffLogin">
+                    Xodim kirish
+                </button>
+                <button onclick="toggleMobileLandingMenu()" class="md:hidden w-10 h-10 rounded-lg flex items-center justify-center text-white/80 hover:text-white hover:bg-white/10 transition-colors" aria-label="Menyuni ochish">
+                    <i class="fas fa-bars text-lg"></i>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Mobile Landing Menu -->
+    <div id="mobileLandingMenu" class="fixed inset-0 bg-black/60 z-[60] hidden" onclick="toggleMobileLandingMenu()">
+        <div class="absolute right-0 top-0 bottom-0 w-72 bg-white dark:bg-gray-900 shadow-2xl p-6" onclick="event.stopPropagation()">
+            <div class="flex justify-between items-center mb-8">
+                <span class="font-bold text-secondary text-lg">Menu</span>
+                <button onclick="toggleMobileLandingMenu()" class="w-8 h-8 rounded-lg bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-gray-500" aria-label="Menyuni yopish">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="space-y-2">
+                <button onclick="scrollToSection('hero'); toggleMobileLandingMenu()" class="w-full text-left px-4 py-3 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-800 font-medium text-gray-700 dark:text-gray-200" data-key="home">Bosh sahifa</button>
+                <button onclick="navigateGuest('medicines'); toggleMobileLandingMenu()" class="w-full text-left px-4 py-3 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-800 font-medium text-gray-700 dark:text-gray-200" data-key="medicines">Dorilar</button>
+                <button onclick="scrollToSection('features'); toggleMobileLandingMenu()" class="w-full text-left px-4 py-3 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-800 font-medium text-gray-700 dark:text-gray-200" data-key="features">Xizmatlar</button>
+                <button onclick="scrollToSection('contact'); toggleMobileLandingMenu()" class="w-full text-left px-4 py-3 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-800 font-medium text-gray-700 dark:text-gray-200" data-key="contact">Aloqa</button>
+                <button onclick="showAuthScreen(); toggleMobileLandingMenu()" class="w-full text-left px-4 py-3 rounded-xl bg-primary/10 text-primary font-medium" data-key="staffLogin">Xodim kirish</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hero Section -->
+    <section id="hero" class="landing-hero min-h-screen pt-24 pb-12 px-4 flex items-center">
+        <div class="max-w-7xl mx-auto w-full">
+            <div class="flex flex-col lg:flex-row items-center gap-12">
+                <div class="flex-1 text-center lg:text-left">
+                    <div class="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm border border-white/20 rounded-full px-4 py-2 mb-6">
+                        <i class="far fa-clock text-primary"></i>
+                        <span class="text-white/90 text-sm" data-key="workTimeBadge">Dushanba - Shanba: 08:00 - 22:00</span>
+                    </div>
+                    <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold text-white leading-tight mb-6">
+                        <span data-key="heroTitle1">JasurMED Pharm -</span><br>
+                        <span class="text-primary" data-key="heroTitle2">sog'lig'ingiz uchun ishonchli dorixona</span>
+                    </h1>
+                    <p class="text-lg text-white/70 mb-8 max-w-xl mx-auto lg:mx-0" data-key="heroDesc">
+                        Ishonchli dorixona - uyingizgacha yetkazib beramiz. Dorilarni onlayn tanlang, retseptingizni yuklang va buyurtmani uyingizga oling.
+                    </p>
+                    <div class="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
+                        <button onclick="navigateGuest('medicines')" class="bg-primary hover:bg-primary/90 text-white px-8 py-4 rounded-2xl font-semibold text-lg shadow-lg shadow-primary/30 transition-all transform hover:scale-[1.02]" data-key="viewMedicines">
+                            Dorilarni ko'rish
+                        </button>
+                        <button onclick="openPrescriptionUpload()" class="bg-white/10 hover:bg-white/20 backdrop-blur-sm border border-white/30 text-white px-8 py-4 rounded-2xl font-semibold text-lg transition-all" data-key="uploadPrescription">
+                            Retsept yuklash
+                        </button>
+                    </div>
+                    <div class="flex flex-wrap items-center justify-center lg:justify-start gap-6 mt-10">
+                        <div class="flex items-center gap-2 text-white/80">
+                            <i class="fas fa-phone text-primary"></i>
+                            <span class="font-medium">+998 886605808</span>
+                        </div>
+                        <div class="flex items-center gap-2 text-white/80">
+                            <i class="fas fa-map-marker-alt text-primary"></i>
+                            <span data-key="locationShort">Paxtachi mahallasi</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex-1 w-full max-w-lg">
+                    <div class="relative">
+                        <div class="absolute -inset-4 bg-primary/20 rounded-[2rem] blur-2xl"></div>
+                        <div class="relative bg-white/5 backdrop-blur-sm border border-white/10 rounded-[2rem] p-2 overflow-hidden">
+                            <img src="https://images.unsplash.com/photo-1587854692152-cbe660dbde88?w=600&h=500&fit=crop" alt="Pharmacy" class="w-full h-80 object-cover rounded-[1.5rem]">
+                            <div class="absolute bottom-6 left-6 right-6 bg-white/90 dark:bg-gray-900/90 backdrop-blur-sm rounded-xl p-4">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center text-primary">
+                                        <i class="fas fa-shield-medical"></i>
+                                    </div>
+                                    <div>
+                                        <p class="font-bold text-secondary text-sm">JasurMED</p>
+                                        <p class="text-xs text-gray-500" data-key="slogan">Sog'liq va ishonch</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section id="features" class="py-20 px-4 bg-white dark:bg-gray-900">
+        <div class="max-w-7xl mx-auto">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl font-bold text-secondary mb-4" data-key="whyChoose">Nima uchun bizni tanlaysiz?</h2>
+                <p class="text-gray-500 max-w-2xl mx-auto" data-key="whyChooseDesc">Professional farmatsevtlar, sifatli dorilar va tezkor yetkazib berish xizmati</p>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div class="bg-gray-50 dark:bg-gray-800 rounded-2xl p-6 text-center card-hover">
+                    <div class="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center text-primary text-2xl mx-auto mb-4">
+                        <i class="fas fa-truck-fast"></i>
+                    </div>
+                    <h3 class="font-bold text-secondary mb-2" data-key="feat1Title">Tezkor yetkazib berish</h3>
+                    <p class="text-sm text-gray-500" data-key="feat1Desc">1-2 soat ichida uyingizgacha yetkazib beramiz</p>
+                </div>
+                <div class="bg-gray-50 dark:bg-gray-800 rounded-2xl p-6 text-center card-hover">
+                    <div class="w-16 h-16 bg-success/10 rounded-2xl flex items-center justify-center text-success text-2xl mx-auto mb-4">
+                        <i class="fas fa-certificate"></i>
+                    </div>
+                    <h3 class="font-bold text-secondary mb-2" data-key="feat2Title">Sifat kafolati</h3>
+                    <p class="text-sm text-gray-500" data-key="feat2Desc">Faqat sertifikatlangan dorilar</p>
+                </div>
+                <div class="bg-gray-50 dark:bg-gray-800 rounded-2xl p-6 text-center card-hover">
+                    <div class="w-16 h-16 bg-accent/10 rounded-2xl flex items-center justify-center text-accent text-2xl mx-auto mb-4">
+                        <i class="fas fa-user-md"></i>
+                    </div>
+                    <h3 class="font-bold text-secondary mb-2" data-key="feat3Title">Farmatsevt maslahati</h3>
+                    <p class="text-sm text-gray-500" data-key="feat3Desc">Professional maslahat bepul</p>
+                </div>
+                <div class="bg-gray-50 dark:bg-gray-800 rounded-2xl p-6 text-center card-hover">
+                    <div class="w-16 h-16 bg-warning/10 rounded-2xl flex items-center justify-center text-warning text-2xl mx-auto mb-4">
+                        <i class="fas fa-wallet"></i>
+                    </div>
+                    <h3 class="font-bold text-secondary mb-2" data-key="feat4Title">Naqd to'lov</h3>
+                    <p class="text-sm text-gray-500" data-key="feat4Desc">Yetkazib berilganda to'lang</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Quick Categories -->
+    <section class="py-16 px-4 bg-gray-50 dark:bg-gray-800">
+        <div class="max-w-7xl mx-auto">
+            <h2 class="text-2xl font-bold text-secondary mb-8 text-center" data-key="popularCategories">Mashhur kategoriyalar</h2>
+            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+                <button onclick="navigateGuest('medicines', 'painkillers')" class="bg-white dark:bg-gray-700 rounded-xl p-4 text-center shadow-sm hover:shadow-md transition-all card-hover">
+                    <div class="w-11 h-11 rounded-lg bg-primary/10 flex items-center justify-center text-primary text-lg mb-2 mx-auto"><i class="fas fa-tablets"></i></div>
+                    <p class="text-sm font-medium text-gray-700 dark:text-gray-200" data-key="painkillers">Og'riq qoldiruvchilar</p>
+                </button>
+                <button onclick="navigateGuest('medicines', 'antibiotics')" class="bg-white dark:bg-gray-700 rounded-xl p-4 text-center shadow-sm hover:shadow-md transition-all card-hover">
+                    <div class="w-11 h-11 rounded-lg bg-primary/10 flex items-center justify-center text-primary text-lg mb-2 mx-auto"><i class="fas fa-capsules"></i></div>
+                    <p class="text-sm font-medium text-gray-700 dark:text-gray-200" data-key="antibiotics">Antibiotiklar</p>
+                </button>
+                <button onclick="navigateGuest('medicines', 'vitamins')" class="bg-white dark:bg-gray-700 rounded-xl p-4 text-center shadow-sm hover:shadow-md transition-all card-hover">
+                    <div class="w-11 h-11 rounded-lg bg-primary/10 flex items-center justify-center text-primary text-lg mb-2 mx-auto"><i class="fas fa-leaf"></i></div>
+                    <p class="text-sm font-medium text-gray-700 dark:text-gray-200" data-key="vitamins">Vitaminlar</p>
+                </button>
+                <button onclick="navigateGuest('medicines', 'cold')" class="bg-white dark:bg-gray-700 rounded-xl p-4 text-center shadow-sm hover:shadow-md transition-all card-hover">
+                    <div class="w-11 h-11 rounded-lg bg-primary/10 flex items-center justify-center text-primary text-lg mb-2 mx-auto"><i class="fas fa-wind"></i></div>
+                    <p class="text-sm font-medium text-gray-700 dark:text-gray-200" data-key="cold">Shamollash</p>
+                </button>
+                <button onclick="navigateGuest('medicines', 'heart')" class="bg-white dark:bg-gray-700 rounded-xl p-4 text-center shadow-sm hover:shadow-md transition-all card-hover">
+                    <div class="w-11 h-11 rounded-lg bg-primary/10 flex items-center justify-center text-primary text-lg mb-2 mx-auto"><i class="fas fa-heart-pulse"></i></div>
+                    <p class="text-sm font-medium text-gray-700 dark:text-gray-200" data-key="heart">Yurak</p>
+                </button>
+                <button onclick="navigateGuest('medicines', 'diabetes')" class="bg-white dark:bg-gray-700 rounded-xl p-4 text-center shadow-sm hover:shadow-md transition-all card-hover">
+                    <div class="w-11 h-11 rounded-lg bg-primary/10 flex items-center justify-center text-primary text-lg mb-2 mx-auto"><i class="fas fa-droplet"></i></div>
+                    <p class="text-sm font-medium text-gray-700 dark:text-gray-200" data-key="diabetes">Diabet</p>
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact / Footer -->
+    <section id="contact" class="py-16 px-4 bg-secondary text-white">
+        <div class="max-w-7xl mx-auto">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-12">
+                <div>
+                    <div class="flex items-center gap-3 mb-6">
+                        <div class="w-10 h-10 bg-primary rounded-xl flex items-center justify-center">
+                            <i class="fas fa-shield-medical text-white"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-lg">JasurMED</h3>
+                            <p class="text-primary text-xs">PHARM</p>
+                        </div>
+                    </div>
+                    <p class="text-white/60 text-sm leading-relaxed mb-4" data-key="footerAbout">
+                        Ishonchli dorixona - uyingizgacha yetkazib beramiz. Dorilarni onlayn tanlang, retseptingizni yuklang va buyurtmani uyingizga oling.
+                    </p>
+                </div>
+                <div>
+                    <h4 class="font-bold text-lg mb-6" data-key="quickLinks">Sahifalar</h4>
+                    <div class="space-y-3">
+                        <button onclick="navigateGuest('medicines')" class="block text-white/60 hover:text-primary text-sm transition-colors" data-key="medicines">Dorilar katalogi</button>
+                        <button onclick="openPrescriptionUpload()" class="block text-white/60 hover:text-primary text-sm transition-colors" data-key="uploadPrescription">Retsept yuklash</button>
+                        <button onclick="scrollToSection('features')" class="block text-white/60 hover:text-primary text-sm transition-colors" data-key="features">Farmatsevt maslahati</button>
+                        <button onclick="scrollToSection('contact')" class="block text-white/60 hover:text-primary text-sm transition-colors" data-key="faq">Ko'p so'raladigan savollar</button>
+                        <button onclick="showAuthScreen()" class="block text-white/60 hover:text-primary text-sm transition-colors" data-key="staffLogin">Xodim kirish</button>
+                    </div>
+                </div>
+                <div>
+                    <h4 class="font-bold text-lg mb-6" data-key="contactInfo">Aloqa</h4>
+                    <div class="space-y-4">
+                        <div class="flex items-center gap-3">
+                            <i class="fas fa-phone text-primary"></i>
+                            <span class="text-white/80">+998 886605808</span>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <i class="fas fa-phone text-primary"></i>
+                            <span class="text-white/80">+998 97 653 33 83</span>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <i class="fab fa-telegram text-primary"></i>
+                            <span class="text-white/80">Telegram</span>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <i class="fas fa-map-marker-alt text-primary"></i>
+                            <span class="text-white/80" data-key="locationShort">Paxtachi mahallasi</span>
+                        </div>
+                    </div>
+                    <div class="mt-6 pt-6 border-t border-white/10">
+                        <div class="flex items-center gap-3 mb-2">
+                            <i class="far fa-clock text-primary"></i>
+                            <span class="text-white/80 font-medium" data-key="workTime">Ish vaqti</span>
+                        </div>
+                        <p class="text-white/60 text-sm ml-7" data-key="workTimeDetail1">Dushanba - Shanba: 08:00 - 22:00</p>
+                        <p class="text-white/60 text-sm ml-7" data-key="workTimeDetail2">Yakshanba: 09:00 - 20:00</p>
+                    </div>
+                </div>
+            </div>
+            <div class="border-t border-white/10 mt-12 pt-8 text-center">
+                <p class="text-white/40 text-sm">&copy; 2026 JasurMED Pharm. <span data-key="allRights">Barcha huquqlar himoyalangan.</span></p>
+            </div>
+        </div>
+    </section>
+</div>
+
+<!-- ==================== GUEST MEDICINES PAGE ==================== -->
+<div id="guestMedicinesPage" class="hidden min-h-screen pt-20 pb-12 px-4">
+    <div class="max-w-7xl mx-auto">
+        <div class="flex items-center gap-4 mb-8">
+            <button onclick="showLandingPage()" class="w-10 h-10 rounded-xl bg-white dark:bg-gray-800 shadow-sm flex items-center justify-center text-gray-500 hover:text-primary transition-colors">
+                <i class="fas fa-arrow-left"></i>
+            </button>
+            <h1 class="text-2xl font-bold text-secondary" data-key="medicines">Dorilar</h1>
+        </div>
+        <div class="flex flex-col md:flex-row gap-4 mb-6">
+            <div class="flex-1 relative">
+                <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                <input type="text" id="guestMedSearch" placeholder="Qidirish..." oninput="renderGuestMedicines()" class="w-full pl-10 pr-4 py-3 rounded-xl border border-gray-200 search-input bg-white dark:bg-gray-800">
+            </div>
+            <select id="guestMedCategory" onchange="renderGuestMedicines()" class="px-4 py-3 rounded-xl border border-gray-200 search-input bg-white dark:bg-gray-800"></select>
+        </div>
+        <div id="guestMedicinesGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4"></div>
+    </div>
+</div>
+
+<!-- ==================== GUEST CART ==================== -->
+<div id="guestCartPage" class="hidden min-h-screen pt-20 pb-12 px-4">
+    <div class="max-w-3xl mx-auto">
+        <div class="flex items-center gap-4 mb-8">
+            <button onclick="showLandingPage()" class="w-10 h-10 rounded-xl bg-white dark:bg-gray-800 shadow-sm flex items-center justify-center text-gray-500 hover:text-primary transition-colors">
+                <i class="fas fa-arrow-left"></i>
+            </button>
+            <h1 class="text-2xl font-bold text-secondary" data-key="cart">Savat</h1>
+        </div>
+        <div id="guestCartContent"></div>
+    </div>
+</div>
+
+<!-- ==================== CHECKOUT PAGE ==================== -->
+<div id="checkoutPage" class="hidden min-h-screen pt-20 pb-12 px-4">
+    <div class="max-w-3xl mx-auto">
+        <div class="flex items-center gap-4 mb-8">
+            <button onclick="openGuestCart()" class="w-10 h-10 rounded-xl bg-white dark:bg-gray-800 shadow-sm flex items-center justify-center text-gray-500 hover:text-primary transition-colors">
+                <i class="fas fa-arrow-left"></i>
+            </button>
+            <h1 class="text-2xl font-bold text-secondary" data-key="checkout">Buyurtma berish</h1>
+        </div>
+        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm p-6">
+            <div id="checkoutItems" class="space-y-3 mb-6 pb-6 border-b border-gray-100 dark:border-gray-700"></div>
+            <div class="space-y-4 mb-6">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1" data-key="customerName">Ismingiz</label>
+                    <input type="text" id="checkoutName" placeholder="Ismingizni kiriting" autocomplete="name" class="w-full px-4 py-3 rounded-xl border border-gray-200 search-input bg-white dark:bg-gray-700">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1" data-key="phoneNumber">Telefon raqami</label>
+                    <input type="tel" id="checkoutPhone" placeholder="+998 90 123 45 67" autocomplete="tel" class="w-full px-4 py-3 rounded-xl border border-gray-200 search-input bg-white dark:bg-gray-700">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1" data-key="address">Manzilni xaritadan belgilang</label>
+                    <div id="map" class="h-64 w-full rounded-xl z-0"></div>
+                    <input type="hidden" id="checkoutLat">
+                    <input type="hidden" id="checkoutLng">
+                    <input type="text" id="checkoutAddress" readonly placeholder="Xaritadan manzilni tanlang" class="w-full mt-3 px-4 py-3 rounded-xl border border-gray-200 search-input bg-gray-50 dark:bg-gray-700 text-gray-500">
+                </div>
+                <div id="checkoutPrescriptionSection" class="hidden">
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1" data-key="uploadPrescription">Retsept yuklash</label>
+                    <input type="file" id="checkoutPrescription" accept="image/jpeg,image/png,image/webp" onchange="previewCheckoutPrescription(this)" class="w-full text-sm">
+                    <div id="checkoutPrescriptionPreview" class="mt-2 hidden">
+                        <img id="checkoutPreviewImg" class="w-full h-32 object-cover rounded-lg">
+                    </div>
+                </div>
+            </div>
+            <div class="border-t border-gray-100 dark:border-gray-700 pt-4 mb-6">
+                <div class="flex justify-between items-center mb-2">
+                    <span class="text-gray-500" data-key="total">Jami</span>
+                    <span class="font-bold text-xl text-primary" id="checkoutTotal">0 so'm</span>
+                </div>
+                <div class="flex items-center gap-2 text-sm text-success bg-success/10 rounded-lg p-3">
+                    <i class="fas fa-money-bill-wave"></i>
+                    <span data-key="cashPayment">To'lov usuli: Naqd pul (yetkazib berilganda)</span>
+                </div>
+            </div>
+            <button onclick="submitGuestOrder()" class="w-full bg-gradient-to-r from-primary to-accent text-white py-4 rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all transform hover:scale-[1.02]" data-key="placeOrder">
+                Buyurtma berish
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- ==================== AUTH SCREEN (Staff Only) ==================== -->
+<div id="authScreen" class="hidden min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/10 to-secondary/10">
+    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl p-8 w-full max-w-md mx-4 fade-in">
+        <div class="text-center mb-8">
+            <div class="w-20 h-20 bg-gradient-to-br from-primary to-accent rounded-2xl mx-auto mb-4 flex items-center justify-center shadow-lg">
+                <i class="fas fa-shield-medical text-white text-3xl"></i>
+            </div>
+            <h1 class="text-2xl font-bold brand-text dark:text-white">JASUR MED</h1>
+            <p class="text-gray-500 mt-1" data-key="staffLoginTitle">Xodimlar uchun tizimga kirish</p>
+        </div>
+        <div class="flex bg-gray-100 dark:bg-gray-700 rounded-lg p-1 mb-6">
+            <button onclick="switchLang('lotin')" id="btnLotin" class="lang-btn flex-1 py-2 rounded-md text-sm font-medium active">Lotin</button>
+            <button onclick="switchLang('kril')" id="btnKril" class="lang-btn flex-1 py-2 rounded-md text-sm font-medium">Крил</button>
+        </div>
+        <div class="space-y-4">
+            <div>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1" data-key="email">Email</label>
+                <input type="email" id="emailInput" placeholder="email@example.com" class="w-full px-4 py-3 rounded-xl border border-gray-200 search-input dark:bg-gray-700 dark:border-gray-600">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1" data-key="password">Parol</label>
+                <input type="password" id="passwordInput" placeholder="••••••" class="w-full px-4 py-3 rounded-xl border border-gray-200 search-input dark:bg-gray-700 dark:border-gray-600">
+            </div>
+            <button onclick="login()" class="w-full bg-gradient-to-r from-primary to-accent text-white py-3 rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all transform hover:scale-[1.02]" data-key="loginBtn">Kirish</button>
+        </div>
+        <div class="mt-6 text-center text-xs text-gray-400 space-y-1">
+            <p data-key="defaultCreds">Tizimga kirish uchun administratordan login oling</p>
+            <p class="text-gray-300 mt-2">Xavfsizlik uchun ma'lumotlarni hech kimga bermang</p>
+        </div>
+        <button onclick="showLandingPage()" class="w-full mt-4 py-2 rounded-lg border border-gray-200 text-gray-500 text-sm font-medium hover:bg-gray-50 dark:border-gray-600 dark:text-gray-400 dark:hover:bg-gray-700 transition-colors">
+            <i class="fas fa-arrow-left mr-2"></i>Bosh sahifaga qaytish
+        </button>
+    </div>
+</div>
+
+<!-- ==================== MAIN APP (Staff Dashboard) ==================== -->
+<div id="mainApp" class="hidden min-h-screen flex">
+    <aside class="w-64 bg-white dark:bg-gray-800 shadow-xl z-50 hidden md:flex flex-col">
+        <div class="p-6 border-b dark:border-gray-700">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-gradient-to-br from-primary to-accent rounded-lg flex items-center justify-center">
+                    <i class="fas fa-shield-medical text-white text-lg"></i>
+                </div>
+                <div>
+                    <h2 class="font-bold brand-text dark:text-white text-lg leading-tight">JASUR MED</h2>
+                    <p class="text-xs text-gray-400" data-key="slogan">Sog'liq va ishonch</p>
+                </div>
+            </div>
+        </div>
+        <nav class="flex-1 py-4 overflow-y-auto" id="sidebarNav"></nav>
+        <div class="p-4 border-t dark:border-gray-700">
+            <div class="flex items-center gap-3 mb-3">
+                <div class="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center text-white font-bold" id="userAvatar">A</div>
+                <div class="flex-1 min-w-0">
+                    <p class="font-medium text-sm truncate dark:text-white" id="userName">Admin</p>
+                    <p class="text-xs text-gray-400 capitalize" id="userRole">admin</p>
+                </div>
+            </div>
+            <div class="flex gap-2 mb-3">
+                <button onclick="switchLang('lotin')" id="sideLotin" class="lang-btn flex-1 py-1.5 rounded-lg text-xs font-medium border active dark:border-gray-600 dark:text-gray-300">Lotin</button>
+                <button onclick="switchLang('kril')" id="sideKril" class="lang-btn flex-1 py-1.5 rounded-lg text-xs font-medium border dark:border-gray-600 dark:text-gray-300">Крил</button>
+            </div>
+            <button onclick="logout()" class="w-full py-2 rounded-lg border border-red-200 text-red-500 text-sm font-medium hover:bg-red-50 transition-colors dark:border-red-900 dark:hover:bg-red-900/20" data-key="logout">
+                <i class="fas fa-sign-out-alt mr-2"></i>Chiqish
+            </button>
+        </div>
+    </aside>
+
+    <div class="md:hidden fixed top-0 left-0 right-0 bg-white dark:bg-gray-800 shadow-md z-40 px-4 py-3 flex items-center justify-between">
+        <div class="flex items-center gap-2">
+            <div class="w-8 h-8 bg-gradient-to-br from-primary to-accent rounded-lg flex items-center justify-center">
+                <i class="fas fa-shield-medical text-white text-sm"></i>
+            </div>
+            <span class="font-bold text-secondary dark:text-white">JASUR MED</span>
+        </div>
+        <button onclick="toggleMobileMenu()" class="p-2 dark:text-white" aria-label="Menyuni ochish"><i class="fas fa-bars text-secondary dark:text-white"></i></button>
+    </div>
+
+    <div id="mobileMenu" class="fixed inset-0 bg-black/50 z-50 hidden md:hidden" onclick="toggleMobileMenu()">
+        <div class="absolute right-0 top-0 bottom-0 w-64 bg-white dark:bg-gray-800 shadow-2xl p-4" onclick="event.stopPropagation()">
+            <div class="flex justify-between items-center mb-6">
+                <span class="font-bold text-secondary dark:text-white">Menu</span>
+                <button onclick="toggleMobileMenu()" aria-label="Menyuni yopish"><i class="fas fa-times text-gray-400"></i></button>
+            </div>
+            <nav id="mobileNav" class="space-y-1"></nav>
+            <div class="mt-6 pt-4 border-t dark:border-gray-700">
+                <div class="flex gap-2 mb-4">
+                    <button onclick="switchLang('lotin')" class="lang-btn flex-1 py-2 rounded-lg text-xs border active dark:border-gray-600 dark:text-gray-300">Lotin</button>
+                    <button onclick="switchLang('kril')" class="lang-btn flex-1 py-2 rounded-lg text-xs border dark:border-gray-600 dark:text-gray-300">Крил</button>
+                </div>
+                <button onclick="logout()" class="w-full py-2 rounded-lg bg-red-50 text-red-500 text-sm font-medium dark:bg-red-900/20">
+                    <i class="fas fa-sign-out-alt mr-2"></i>Chiqish
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div id="notifBellWrap" class="fixed top-3 right-4 md:top-4 md:right-6 z-[70]">
+        <button id="notifBellBtn" onclick="toggleNotifPanel()" class="relative w-10 h-10 rounded-full bg-white dark:bg-gray-800 shadow-md flex items-center justify-center text-gray-500 dark:text-gray-300 hover:text-primary transition-colors" aria-label="Bildirishnomalar">
+            <i class="fas fa-bell"></i>
+            <span id="notifBellBadge" class="notif-dot hidden"></span>
+        </button>
+    </div>
+
+    <main class="flex-1 overflow-y-auto md:pt-0 pt-16">
+        <div id="pageContent" class="p-4 md:p-8 max-w-7xl mx-auto"></div>
+    </main>
+</div>
+
+<div id="modal" class="modal" onclick="closeModal(event)">
+    <div class="modal-content p-6 dark:bg-gray-800" id="modalBody" onclick="event.stopPropagation()"></div>
+</div>
+
+<script src="app.js"></script>
+<!-- PWA Service Worker -->
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', function() {
+      navigator.serviceWorker.register('/sw.js').catch(function(err) {
+        console.log('Service Worker registration failed:', err);
+      });
+    });
+  }
+</script>
+</body>
+</html>
